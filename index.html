@@ -1,0 +1,2796 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoomOps — AI Agents for Business Operations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --pink: #FF4FD8;
+            --violet: #A855F7;
+            --accent: #7C3AED;
+            --bg0: #050505;
+            --bg1: #09090B;
+            --bg2: #0F0F12;
+            --bg3: #141418;
+            --text: #FFFFFF;
+            --text2: #D4D4D8;
+            --text3: #A1A1AA;
+            --border: rgba(255, 255, 255, 0.06);
+            --glass: rgba(255, 255, 255, 0.03);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px
+        }
+
+        body {
+            background: var(--bg0);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+            cursor: none
+        }
+
+        /* CUSTOM CURSOR */
+        #cursor {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            background: var(--pink);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s, width 0.3s, height 0.3s, opacity 0.3s;
+            mix-blend-mode: screen
+        }
+
+        #cursor-trail {
+            position: fixed;
+            width: 32px;
+            height: 32px;
+            border: 1px solid rgba(255, 79, 216, 0.4);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: left 0.15s ease, top 0.15s ease, width 0.3s, height 0.3s
+        }
+
+        body:has(a:hover) #cursor,
+        body:has(button:hover) #cursor {
+            width: 20px;
+            height: 20px
+        }
+
+        /* NAV */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 20px 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.4s
+        }
+
+        nav.scrolled {
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 48px
+        }
+
+        .nav-logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 22px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--pink), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center
+        }
+
+        .nav-links a {
+            color: var(--text3);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 400;
+            transition: color 0.2s;
+            letter-spacing: 0.01em
+        }
+
+        .nav-links a:hover {
+            color: var(--text)
+        }
+
+        .nav-cta {
+            background: linear-gradient(135deg, var(--pink), var(--violet));
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: none;
+            transition: all 0.3s;
+            letter-spacing: 0.01em
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 32px rgba(255, 79, 216, 0.35)
+        }
+
+        /* HERO */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 120px 48px 80px
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0
+        }
+
+        .mesh-gradient {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 50% -20%, rgba(168, 85, 247, 0.15) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% 60%, rgba(255, 79, 216, 0.1) 0%, transparent 50%), radial-gradient(ellipse 40% 50% at 10% 80%, rgba(124, 58, 237, 0.08) 0%, transparent 50%)
+        }
+
+        .grid-pattern {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 80%)
+        }
+
+        #particles-canvas {
+            position: absolute;
+            inset: 0;
+            z-index: 1
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 79, 216, 0.08);
+            border: 1px solid rgba(255, 79, 216, 0.2);
+            border-radius: 100px;
+            padding: 6px 16px 6px 8px;
+            margin-bottom: 32px;
+            font-size: 13px;
+            color: var(--text2);
+            letter-spacing: 0.02em
+        }
+
+        .hero-badge-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--pink);
+            border-radius: 50%;
+            animation: pulse-dot 2s ease infinite
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1)
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(0.8)
+            }
+        }
+
+        .hero-title {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(48px, 7vw, 88px);
+            font-weight: 800;
+            line-height: 1.0;
+            letter-spacing: -0.03em;
+            margin-bottom: 24px
+        }
+
+        .hero-title .line1 {
+            display: block;
+            opacity: 0;
+            transform: translateY(40px);
+            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards
+        }
+
+        .hero-title .line2 {
+            display: block;
+            opacity: 0;
+            transform: translateY(40px);
+            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.35s forwards
+        }
+
+        .hero-title .gradient-text {
+            background: linear-gradient(135deg, var(--pink) 0%, var(--violet) 60%, #60a5fa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .hero-sub {
+            font-size: 18px;
+            color: var(--text2);
+            max-width: 600px;
+            margin: 0 auto 48px;
+            font-weight: 300;
+            line-height: 1.7;
+            opacity: 0;
+            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            opacity: 0;
+            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.65s forwards
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--pink), var(--violet));
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 100px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: none;
+            transition: all 0.3s;
+            letter-spacing: 0.01em;
+            position: relative;
+            overflow: hidden
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), transparent);
+            opacity: 0;
+            transition: opacity 0.3s
+        }
+
+        .btn-primary:hover::before {
+            opacity: 1
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 40px rgba(255, 79, 216, 0.4)
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 14px 28px;
+            border-radius: 100px;
+            font-size: 15px;
+            font-weight: 400;
+            cursor: none;
+            transition: all 0.3s;
+            letter-spacing: 0.01em
+        }
+
+        .btn-secondary:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.04);
+            transform: translateY(-2px)
+        }
+
+        /* HERO DASHBOARD */
+        .hero-visual {
+            position: relative;
+            z-index: 2;
+            margin-top: 72px;
+            opacity: 0;
+            animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards
+        }
+
+        .dashboard {
+            background: rgba(15, 15, 18, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 24px;
+            backdrop-filter: blur(20px);
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 79, 216, 0.2) inset
+        }
+
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px
+        }
+
+        .dashboard-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text3);
+            letter-spacing: 0.06em;
+            text-transform: uppercase
+        }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 100px;
+            padding: 4px 10px;
+            font-size: 12px;
+            color: #4ade80
+        }
+
+        .status-dot {
+            width: 5px;
+            height: 5px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: pulse-dot 1.5s ease infinite
+        }
+
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px
+        }
+
+        .agent-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 14px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden
+        }
+
+        .agent-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            border-radius: 2px 2px 0 0
+        }
+
+        .agent-card.pink::before {
+            background: linear-gradient(90deg, var(--pink), transparent)
+        }
+
+        .agent-card.violet::before {
+            background: linear-gradient(90deg, var(--violet), transparent)
+        }
+
+        .agent-card.blue::before {
+            background: linear-gradient(90deg, #60a5fa, transparent)
+        }
+
+        .agent-card.green::before {
+            background: linear-gradient(90deg, #4ade80, transparent)
+        }
+
+        .agent-card.orange::before {
+            background: linear-gradient(90deg, #fb923c, transparent)
+        }
+
+        .agent-card.cyan::before {
+            background: linear-gradient(90deg, #22d3ee, transparent)
+        }
+
+        .agent-icon {
+            font-size: 18px;
+            margin-bottom: 8px
+        }
+
+        .agent-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+            font-family: 'Syne', sans-serif;
+            letter-spacing: 0.01em
+        }
+
+        .agent-status-line {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px
+        }
+
+        .agent-status-bar {
+            flex: 1;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 2px;
+            overflow: hidden
+        }
+
+        .agent-status-fill {
+            height: 100%;
+            border-radius: 2px;
+            animation: progress-fill 3s ease infinite alternate
+        }
+
+        .agent-card.pink .agent-status-fill {
+            background: var(--pink);
+            width: 85%
+        }
+
+        .agent-card.violet .agent-status-fill {
+            background: var(--violet);
+            width: 92%
+        }
+
+        .agent-card.blue .agent-status-fill {
+            background: #60a5fa;
+            width: 67%
+        }
+
+        .agent-card.green .agent-status-fill {
+            background: #4ade80;
+            width: 78%
+        }
+
+        .agent-card.orange .agent-status-fill {
+            background: #fb923c;
+            width: 55%
+        }
+
+        .agent-card.cyan .agent-status-fill {
+            background: #22d3ee;
+            width: 89%
+        }
+
+        @keyframes progress-fill {
+            0% {
+                opacity: 0.6
+            }
+
+            100% {
+                opacity: 1
+            }
+        }
+
+        .agent-pct {
+            font-size: 11px;
+            color: var(--text3)
+        }
+
+        .flow-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            animation: flow-pulse 3s ease infinite
+        }
+
+        .flow-line:nth-child(2) {
+            animation-delay: 0.5s
+        }
+
+        .flow-line:nth-child(3) {
+            animation-delay: 1s
+        }
+
+        @keyframes flow-pulse {
+
+            0%,
+            100% {
+                border-color: rgba(255, 255, 255, 0.05)
+            }
+
+            50% {
+                border-color: rgba(255, 79, 216, 0.2)
+            }
+        }
+
+        .flow-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0
+        }
+
+        .flow-text {
+            font-size: 12px;
+            color: var(--text3);
+            flex: 1
+        }
+
+        .flow-value {
+            font-size: 12px;
+            color: var(--text2);
+            font-weight: 500
+        }
+
+        .flow-badge {
+            background: rgba(255, 79, 216, 0.1);
+            border: 1px solid rgba(255, 79, 216, 0.2);
+            color: var(--pink);
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 100px
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* MARQUEE */
+        .marquee-section {
+            padding: 20px 0;
+            background: rgba(255, 255, 255, 0.015);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            overflow: hidden
+        }
+
+        .marquee-track {
+            display: flex;
+            gap: 0;
+            width: max-content;
+            animation: marquee 20s linear infinite
+        }
+
+        .marquee-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 40px;
+            white-space: nowrap;
+            font-size: 13px;
+            color: var(--text3);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-weight: 500
+        }
+
+        .marquee-sep {
+            color: rgba(255, 79, 216, 0.5);
+            font-size: 18px;
+            margin: 0 4px
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(0)
+            }
+
+            100% {
+                transform: translateX(-50%)
+            }
+        }
+
+        /* STATS */
+        .stats-section {
+            padding: 80px 48px;
+            position: relative;
+            overflow: hidden
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            max-width: 1100px;
+            margin: 0 auto
+        }
+
+        .stat-item {
+            background: var(--bg1);
+            padding: 48px 32px;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.3s
+        }
+
+        .stat-item:hover {
+            background: var(--bg2)
+        }
+
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--pink), transparent);
+            opacity: 0;
+            transition: opacity 0.3s
+        }
+
+        .stat-item:hover::before {
+            opacity: 1
+        }
+
+        .stat-number {
+            font-family: 'Syne', sans-serif;
+            font-size: 52px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, var(--text) 40%, var(--text3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text3);
+            font-weight: 400
+        }
+
+        .stat-plus {
+            background: linear-gradient(135deg, var(--pink), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        /* SECTIONS SHARED */
+        section {
+            padding: 100px 48px
+        }
+
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--pink);
+            margin-bottom: 16px
+        }
+
+        .section-label::before {
+            content: '';
+            width: 20px;
+            height: 1px;
+            background: var(--pink)
+        }
+
+        h2.section-title {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(36px, 4.5vw, 56px);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.08;
+            margin-bottom: 16px
+        }
+
+        .section-sub {
+            font-size: 18px;
+            color: var(--text2);
+            max-width: 580px;
+            line-height: 1.65;
+            font-weight: 300
+        }
+
+        .max-w {
+            max-width: 1200px;
+            margin: 0 auto
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(32px);
+            transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1)
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        .reveal-delay-1 {
+            transition-delay: 0.1s
+        }
+
+        .reveal-delay-2 {
+            transition-delay: 0.2s
+        }
+
+        .reveal-delay-3 {
+            transition-delay: 0.3s
+        }
+
+        .reveal-delay-4 {
+            transition-delay: 0.4s
+        }
+
+        .reveal-delay-5 {
+            transition-delay: 0.5s
+        }
+
+        /* PROBLEM SECTION */
+        .problems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 64px
+        }
+
+        .problem-card {
+            background: var(--bg1);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s
+        }
+
+        .problem-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(255, 79, 216, 0.06), transparent);
+            opacity: 0;
+            transition: opacity 0.4s
+        }
+
+        .problem-card:hover {
+            border-color: rgba(255, 79, 216, 0.2);
+            transform: translateY(-4px)
+        }
+
+        .problem-card:hover::after {
+            opacity: 1
+        }
+
+        .problem-icon {
+            font-size: 24px;
+            margin-bottom: 16px
+        }
+
+        .problem-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text)
+        }
+
+        .problem-desc {
+            font-size: 14px;
+            color: var(--text3);
+            line-height: 1.6
+        }
+
+        .problem-cost {
+            margin-top: 16px;
+            font-size: 12px;
+            color: #f87171;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px
+        }
+
+        /* SOLUTION / AGENTS */
+        .agents-orbit {
+            position: relative;
+            margin: 80px auto;
+            max-width: 500px;
+            height: 500px
+        }
+
+        .orbit-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--pink), var(--violet));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 0 40px rgba(255, 79, 216, 0.4), 0 0 80px rgba(255, 79, 216, 0.15);
+            z-index: 5
+        }
+
+        .orbit-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            border-radius: 50%;
+            border: 1px solid;
+            transform: translate(-50%, -50%);
+            animation: spin-slow linear infinite
+        }
+
+        .orbit-ring-1 {
+            width: 220px;
+            height: 220px;
+            border-color: rgba(255, 79, 216, 0.15);
+            animation-duration: 20s
+        }
+
+        .orbit-ring-2 {
+            width: 360px;
+            height: 360px;
+            border-color: rgba(168, 85, 247, 0.1);
+            animation-duration: 30s;
+            animation-direction: reverse
+        }
+
+        .orbit-ring-3 {
+            width: 480px;
+            height: 480px;
+            border-color: rgba(255, 79, 216, 0.06);
+            animation-duration: 45s
+        }
+
+        @keyframes spin-slow {
+            from {
+                transform: translate(-50%, -50%) rotate(0)
+            }
+
+            to {
+                transform: translate(-50%, -50%) rotate(360deg)
+            }
+        }
+
+        .orbit-agent {
+            position: absolute;
+            width: 64px;
+            height: 64px;
+            background: var(--bg2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: none;
+            transition: all 0.3s;
+            top: 50%;
+            left: 50%
+        }
+
+        .orbit-agent span {
+            font-size: 10px;
+            color: var(--text3);
+            font-weight: 600;
+            font-family: 'Syne', sans-serif;
+            letter-spacing: 0.02em;
+            margin-top: 2px
+        }
+
+        .orbit-agent:hover {
+            border-color: rgba(255, 79, 216, 0.4);
+            background: rgba(255, 79, 216, 0.08);
+            transform: translate(-50%, -50%) scale(1.1) !important
+        }
+
+        .connection-svg {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none
+        }
+
+        /* SERVICES */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            overflow: hidden;
+            margin-top: 64px
+        }
+
+        .service-card {
+            background: var(--bg1);
+            padding: 48px 36px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s;
+            cursor: none
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 79, 216, 0.05), rgba(168, 85, 247, 0.03));
+            opacity: 0;
+            transition: opacity 0.4s
+        }
+
+        .service-card:hover::before {
+            opacity: 1
+        }
+
+        .service-card:hover {
+            background: var(--bg2)
+        }
+
+        .service-num {
+            font-family: 'Syne', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: var(--text3);
+            margin-bottom: 24px
+        }
+
+        .service-icon-wrap {
+            width: 52px;
+            height: 52px;
+            background: rgba(255, 79, 216, 0.08);
+            border: 1px solid rgba(255, 79, 216, 0.15);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 24px;
+            transition: all 0.3s
+        }
+
+        .service-card:hover .service-icon-wrap {
+            background: rgba(255, 79, 216, 0.15);
+            border-color: rgba(255, 79, 216, 0.3);
+            box-shadow: 0 0 24px rgba(255, 79, 216, 0.15)
+        }
+
+        .service-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em
+        }
+
+        .service-desc {
+            font-size: 14px;
+            color: var(--text3);
+            line-height: 1.7;
+            margin-bottom: 24px
+        }
+
+        .service-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .service-tag {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 100px;
+            padding: 4px 12px;
+            font-size: 12px;
+            color: var(--text3)
+        }
+
+        .service-arrow {
+            position: absolute;
+            bottom: 36px;
+            right: 36px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 79, 216, 0.08);
+            border: 1px solid rgba(255, 79, 216, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.3s;
+            opacity: 0;
+            transform: translateX(-8px)
+        }
+
+        .service-card:hover .service-arrow {
+            opacity: 1;
+            transform: translateX(0)
+        }
+
+        /* HOW IT WORKS */
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            margin-top: 80px;
+            position: relative;
+            max-width: 700px
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 22px;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: linear-gradient(to bottom, var(--pink), var(--violet), transparent)
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 32px;
+            padding-bottom: 60px;
+            position: relative
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0
+        }
+
+        .timeline-dot {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--pink), var(--violet));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Syne', sans-serif;
+            font-size: 14px;
+            font-weight: 800;
+            flex-shrink: 0;
+            box-shadow: 0 0 24px rgba(255, 79, 216, 0.3);
+            z-index: 2
+        }
+
+        .timeline-content {
+            padding-top: 8px
+        }
+
+        .timeline-step {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--pink);
+            margin-bottom: 8px
+        }
+
+        .timeline-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em
+        }
+
+        .timeline-desc {
+            font-size: 15px;
+            color: var(--text3);
+            line-height: 1.7
+        }
+
+        /* INDUSTRIES */
+        .industries-wrap {
+            margin-top: 64px
+        }
+
+        .industry-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 32px
+        }
+
+        .industry-tab {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            padding: 10px 20px;
+            font-size: 14px;
+            color: var(--text3);
+            cursor: none;
+            transition: all 0.3s;
+            font-weight: 400
+        }
+
+        .industry-tab.active,
+        .industry-tab:hover {
+            background: rgba(255, 79, 216, 0.1);
+            border-color: rgba(255, 79, 216, 0.3);
+            color: var(--text)
+        }
+
+        .industry-content {
+            background: var(--bg1);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 48px;
+            min-height: 200px
+        }
+
+        .industry-content-inner {
+            display: none
+        }
+
+        .industry-content-inner.active {
+            display: flex;
+            gap: 48px;
+            align-items: flex-start
+        }
+
+        .industry-icon-large {
+            font-size: 48px;
+            flex-shrink: 0
+        }
+
+        .industry-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 12px
+        }
+
+        .industry-desc {
+            font-size: 15px;
+            color: var(--text3);
+            line-height: 1.7;
+            margin-bottom: 20px
+        }
+
+        .industry-bullets {
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .industry-bullet {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: var(--text2)
+        }
+
+        .industry-bullet::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            background: var(--pink);
+            border-radius: 50%;
+            flex-shrink: 0
+        }
+
+        /* RESULTS */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-top: 64px
+        }
+
+        .result-card {
+            background: var(--bg1);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 36px 28px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60%;
+            background: linear-gradient(to top, rgba(255, 79, 216, 0.04), transparent)
+        }
+
+        .result-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(255, 79, 216, 0.2);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4)
+        }
+
+        .result-icon {
+            font-size: 28px;
+            margin-bottom: 20px
+        }
+
+        .result-number {
+            font-family: 'Syne', sans-serif;
+            font-size: 48px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, var(--pink), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .result-label {
+            font-size: 14px;
+            color: var(--text3);
+            margin-top: 4px
+        }
+
+        /* CASE STUDIES */
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 64px
+        }
+
+        .case-card {
+            background: var(--bg1);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s;
+            cursor: none
+        }
+
+        .case-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(255, 79, 216, 0.2);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4)
+        }
+
+        .case-header {
+            padding: 28px 28px 0;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between
+        }
+
+        .case-company {
+            font-family: 'Syne', sans-serif;
+            font-size: 18px;
+            font-weight: 700
+        }
+
+        .case-industry {
+            background: rgba(255, 79, 216, 0.08);
+            border: 1px solid rgba(255, 79, 216, 0.15);
+            border-radius: 100px;
+            padding: 4px 10px;
+            font-size: 11px;
+            color: var(--pink);
+            font-weight: 600;
+            letter-spacing: 0.04em
+        }
+
+        .case-body {
+            padding: 20px 28px 28px
+        }
+
+        .case-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text3);
+            margin-bottom: 6px
+        }
+
+        .case-text {
+            font-size: 14px;
+            color: var(--text2);
+            line-height: 1.6;
+            margin-bottom: 16px
+        }
+
+        .case-result {
+            background: linear-gradient(135deg, rgba(255, 79, 216, 0.08), rgba(168, 85, 247, 0.06));
+            border: 1px solid rgba(255, 79, 216, 0.12);
+            border-radius: 12px;
+            padding: 14px 16px
+        }
+
+        .case-result-num {
+            font-family: 'Syne', sans-serif;
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--pink), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .case-result-text {
+            font-size: 13px;
+            color: var(--text3)
+        }
+
+        /* TESTIMONIALS */
+        .testimonials-wrap {
+            margin-top: 64px;
+            position: relative;
+            overflow: hidden
+        }
+
+        .testimonials-track {
+            display: flex;
+            gap: 16px;
+            animation: testimonials-scroll 30s linear infinite
+        }
+
+        .testimonials-track:hover {
+            animation-play-state: paused
+        }
+
+        .testimonial-card {
+            flex-shrink: 0;
+            width: 380px;
+            background: var(--bg1);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+            position: relative;
+            overflow: hidden
+        }
+
+        .testimonial-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 79, 216, 0.3), transparent)
+        }
+
+        .testimonial-quote {
+            font-size: 32px;
+            color: rgba(255, 79, 216, 0.3);
+            font-family: Georgia, serif;
+            line-height: 1;
+            margin-bottom: 16px
+        }
+
+        .testimonial-text {
+            font-size: 15px;
+            color: var(--text2);
+            line-height: 1.7;
+            margin-bottom: 24px
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .testimonial-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            background: linear-gradient(135deg, var(--pink), var(--violet));
+            font-weight: 700;
+            font-family: 'Syne', sans-serif
+        }
+
+        .testimonial-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 14px;
+            font-weight: 700
+        }
+
+        .testimonial-role {
+            font-size: 13px;
+            color: var(--text3)
+        }
+
+        .stars {
+            color: var(--pink);
+            letter-spacing: 2px;
+            font-size: 13px;
+            margin-bottom: 16px
+        }
+
+        @keyframes testimonials-scroll {
+            0% {
+                transform: translateX(0)
+            }
+
+            100% {
+                transform: translateX(-50%)
+            }
+        }
+
+        /* FAQ */
+        .faq-list {
+            max-width: 720px;
+            margin: 64px auto 0
+        }
+
+        .faq-item {
+            border-bottom: 1px solid var(--border);
+            overflow: hidden
+        }
+
+        .faq-q {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 0;
+            cursor: none;
+            font-family: 'Syne', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: -0.01em;
+            gap: 20px;
+            user-select: none
+        }
+
+        .faq-toggle {
+            width: 28px;
+            height: 28px;
+            background: rgba(255, 79, 216, 0.08);
+            border: 1px solid rgba(255, 79, 216, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--pink);
+            flex-shrink: 0;
+            transition: all 0.3s
+        }
+
+        .faq-item.open .faq-toggle {
+            background: var(--pink);
+            color: white;
+            transform: rotate(45deg)
+        }
+
+        .faq-a {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s
+        }
+
+        .faq-item.open .faq-a {
+            max-height: 200px;
+            padding-bottom: 20px
+        }
+
+        .faq-a p {
+            font-size: 15px;
+            color: var(--text3);
+            line-height: 1.7
+        }
+
+        /* FINAL CTA */
+        .cta-section {
+            padding: 120px 48px;
+            position: relative;
+            overflow: hidden
+        }
+
+        .cta-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(168, 85, 247, 0.12) 0%, transparent 70%)
+        }
+
+        .cta-border {
+            border: 1px solid rgba(255, 79, 216, 0.12);
+            border-radius: 32px;
+            padding: 80px 64px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            max-width: 900px;
+            margin: 0 auto
+        }
+
+        .cta-border::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 32px;
+            background: rgba(255, 79, 216, 0.02)
+        }
+
+        .cta-glow {
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 70%);
+            pointer-events: none
+        }
+
+        .cta-title {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(36px, 5vw, 64px);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 16px
+        }
+
+        .cta-sub {
+            font-size: 18px;
+            color: var(--text2);
+            max-width: 500px;
+            margin: 0 auto 48px;
+            font-weight: 300;
+            line-height: 1.7
+        }
+
+        /* FOOTER */
+        footer {
+            padding: 60px 48px 40px;
+            border-top: 1px solid var(--border)
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1.5fr repeat(4, 1fr);
+            gap: 48px;
+            margin-bottom: 60px;
+            max-width: 1200px;
+            margin: 0 auto
+        }
+
+        .footer-brand {
+            grid-column: 1
+        }
+
+        .footer-logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 20px;
+            background: linear-gradient(135deg, var(--pink), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px
+        }
+
+        .footer-tagline {
+            font-size: 14px;
+            color: var(--text3);
+            line-height: 1.6;
+            max-width: 220px
+        }
+
+        .footer-socials {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px
+        }
+
+        .social-btn {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            transition: all 0.3s;
+            cursor: none;
+            text-decoration: none;
+            color: var(--text3)
+        }
+
+        .social-btn:hover {
+            background: rgba(255, 79, 216, 0.08);
+            border-color: rgba(255, 79, 216, 0.2);
+            color: var(--pink)
+        }
+
+        .footer-col h4 {
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text3);
+            margin-bottom: 16px
+        }
+
+        .footer-col a {
+            display: block;
+            font-size: 14px;
+            color: var(--text3);
+            text-decoration: none;
+            margin-bottom: 10px;
+            transition: color 0.2s
+        }
+
+        .footer-col a:hover {
+            color: var(--text)
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 24px auto 0
+        }
+
+        .footer-copy {
+            font-size: 13px;
+            color: var(--text3)
+        }
+
+        .footer-built {
+            font-size: 13px;
+            color: var(--text3);
+            display: flex;
+            align-items: center;
+            gap: 4px
+        }
+
+        /* MOUSE GLOW */
+        .mouse-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 79, 216, 0.04) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+            transform: translate(-50%, -50%);
+            transition: left 0.5s ease, top 0.5s ease
+        }
+
+        /* RESPONSIVE */
+        @media(max-width:900px) {
+            .agents-grid {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr
+            }
+
+            .results-grid {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .cases-grid {
+                grid-template-columns: 1fr
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 32px
+            }
+
+            nav {
+                padding: 16px 24px
+            }
+
+            section {
+                padding: 60px 24px
+            }
+
+            .hero {
+                padding: 100px 24px 60px
+            }
+
+            .cta-border {
+                padding: 48px 32px
+            }
+
+            .industries-wrap .industry-content-inner.active {
+                flex-direction: column
+            }
+        }
+
+        @media(max-width:600px) {
+            .nav-links {
+                display: none
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr
+            }
+
+            .agents-orbit {
+                height: 340px;
+                max-width: 340px
+            }
+
+            .orbit-ring-3 {
+                width: 320px;
+                height: 320px
+            }
+
+            .orbit-ring-2 {
+                width: 240px;
+                height: 240px
+            }
+
+            .orbit-ring-1 {
+                width: 150px;
+                height: 150px
+            }
+
+            .orbit-center {
+                width: 60px;
+                height: 60px;
+                font-size: 22px
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="cursor"></div>
+    <div id="cursor-trail"></div>
+    <div class="mouse-glow" id="mouseGlow"></div>
+
+    <!-- NAV -->
+    <nav id="navbar">
+        <div class="nav-logo">LoomOps</div>
+        <div class="nav-links">
+            <a href="#services">Services</a>
+            <a href="#how">How It Works</a>
+            <a href="#industries">Industries</a>
+            <a href="#results">Results</a>
+            <a href="#faq">FAQ</a>
+            <button class="nav-cta">Book a Demo</button>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero" id="hero">
+        <div class="hero-bg">
+            <div class="mesh-gradient"></div>
+            <div class="grid-pattern"></div>
+        </div>
+        <canvas id="particles-canvas"></canvas>
+        <div style="max-width:1100px;margin:0 auto;width:100%">
+            <div class="hero-content">
+                <div class="hero-badge"><span class="hero-badge-dot"></span>AI-Powered Business Operations</div>
+                <h1 class="hero-title">
+                    <span class="line1">AI Agents That</span>
+                    <span class="line2"><span class="gradient-text">Run Your Operations</span></span>
+                </h1>
+                <p class="hero-sub">Deploy AI employees that automate repetitive tasks, streamline workflows, and scale
+                    your business without increasing headcount.</p>
+                <div class="hero-actions">
+                    <button class="btn-primary">Book a Demo →</button>
+                    <button class="btn-secondary">See How It Works</button>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="dashboard">
+                    <div class="dashboard-header">
+                        <span class="dashboard-title">LoomOps Control Center</span>
+                        <span class="status-pill"><span class="status-dot"></span>6 Agents Active</span>
+                    </div>
+                    <div class="agents-grid">
+                        <div class="agent-card pink">
+                            <div class="agent-icon">🤖</div>
+                            <div class="agent-name">Sales Agent</div>
+                            <div class="agent-status-line">
+                                <div class="agent-status-bar">
+                                    <div class="agent-status-fill"></div>
+                                </div><span class="agent-pct">85%</span>
+                            </div>
+                        </div>
+                        <div class="agent-card violet">
+                            <div class="agent-icon">💬</div>
+                            <div class="agent-name">Support Agent</div>
+                            <div class="agent-status-line">
+                                <div class="agent-status-bar">
+                                    <div class="agent-status-fill"></div>
+                                </div><span class="agent-pct">92%</span>
+                            </div>
+                        </div>
+                        <div class="agent-card blue">
+                            <div class="agent-icon">⚙️</div>
+                            <div class="agent-name">Ops Agent</div>
+                            <div class="agent-status-line">
+                                <div class="agent-status-bar">
+                                    <div class="agent-status-fill"></div>
+                                </div><span class="agent-pct">67%</span>
+                            </div>
+                        </div>
+                        <div class="agent-card green">
+                            <div class="agent-icon">📊</div>
+                            <div class="agent-name">Report Agent</div>
+                            <div class="agent-status-line">
+                                <div class="agent-status-bar">
+                                    <div class="agent-status-fill"></div>
+                                </div><span class="agent-pct">78%</span>
+                            </div>
+                        </div>
+                        <div class="agent-card orange">
+                            <div class="agent-icon">🔍</div>
+                            <div class="agent-name">Research Agent</div>
+                            <div class="agent-status-line">
+                                <div class="agent-status-bar">
+                                    <div class="agent-status-fill"></div>
+                                </div><span class="agent-pct">55%</span>
+                            </div>
+                        </div>
+                        <div class="agent-card cyan">
+                            <div class="agent-icon">👥</div>
+                            <div class="agent-name">HR Agent</div>
+                            <div class="agent-status-line">
+                                <div class="agent-status-bar">
+                                    <div class="agent-status-fill"></div>
+                                </div><span class="agent-pct">89%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flow-line"><span class="flow-dot" style="background:var(--pink)"></span><span
+                            class="flow-text">Sales Agent → Qualified 14 leads via LinkedIn outreach</span><span
+                            class="flow-badge">+14 leads</span></div>
+                    <div class="flow-line"><span class="flow-dot" style="background:var(--violet)"></span><span
+                            class="flow-text">Support Agent → Resolved 87 tickets autonomously</span><span
+                            class="flow-badge">99.1% CSAT</span></div>
+                    <div class="flow-line"><span class="flow-dot" style="background:#60a5fa"></span><span
+                            class="flow-text">Ops Agent → Updated 240 CRM records across 3 tools</span><span
+                            class="flow-badge">Synced</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MARQUEE -->
+    <div class="marquee-section">
+        <div class="marquee-track" id="marquee">
+            <div class="marquee-item"><span>OpenAI</span><span class="marquee-sep">·</span></div>
+            <div class="marquee-item"><span>Claude</span><span class="marquee-sep">·</span></div>
+            <div class="marquee-item"><span>HubSpot</span><span class="marquee-sep">·</span></div>
+            <div class="marquee-item"><span>Salesforce</span><span class="marquee-sep">·</span></div>
+            <div class="marquee-item"><span>Slack</span><span class="marquee-sep">·</span></div>
+            <div class="marquee-item"><span>Gmail</span><span class="marquee-sep">·</span></div>
+            <div class="marquee-item"><span>Notion</span><span class="marquee-sep">·</span></div>
+            <div class="marquee-item"><span>Zapier</span><span class="marquee-sep">·</span></div>
+            <div class="marquee-item"><span>Make</span><span class="marquee-sep">·</span></div>
+            <div class="marquee-item"><span>Google Workspace</span><span class="marquee-sep">·</span></div>
+            <div class="marquee-item"><span>OpenAI</span><span class="marquee-sep">·</span></div>
+            <div class="marquee-item"><span>Claude</span><span class="marquee-sep">·</span></div>
+            <div class="marquee-item"><span>HubSpot</span><span class="marquee-sep">·</span></div>
+            <div class="marquee-item"><span>Salesforce</span><span class="marquee-sep">·</span></div>
+            <div class="marquee-item"><span>Slack</span><span class="marquee-sep">·</span></div>
+            <div class="marquee-item"><span>Gmail</span><span class="marquee-sep">·</span></div>
+            <div class="marquee-item"><span>Notion</span><span class="marquee-sep">·</span></div>
+            <div class="marquee-item"><span>Zapier</span><span class="marquee-sep">·</span></div>
+            <div class="marquee-item"><span>Make</span><span class="marquee-sep">·</span></div>
+            <div class="marquee-item"><span>Google Workspace</span><span class="marquee-sep">·</span></div>
+        </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-item reveal">
+                <div class="stat-number"><span class="counter" data-target="24">0</span><span
+                        class="stat-plus">/7</span></div>
+                <div class="stat-label">Operations — no downtime, ever</div>
+            </div>
+            <div class="stat-item reveal reveal-delay-1">
+                <div class="stat-number"><span class="counter" data-target="80">0</span><span class="stat-plus">%</span>
+                </div>
+                <div class="stat-label">Average time saved per team</div>
+            </div>
+            <div class="stat-item reveal reveal-delay-2">
+                <div class="stat-number"><span class="counter" data-target="10">0</span><span class="stat-plus">×</span>
+                </div>
+                <div class="stat-label">Faster execution on workflows</div>
+            </div>
+            <div class="stat-item reveal reveal-delay-3">
+                <div class="stat-number">∞</div>
+                <div class="stat-label">Scalability without headcount</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROBLEM -->
+    <section id="problem" style="background:var(--bg1)">
+        <div class="max-w">
+            <div class="reveal"><span class="section-label">The Problem</span></div>
+            <h2 class="section-title reveal reveal-delay-1">Your team is <span
+                    style="background:linear-gradient(135deg,var(--pink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">drowning</span><br>in
+                repetitive work</h2>
+            <p class="section-sub reveal reveal-delay-2">Every hour spent on manual tasks is an hour not spent building.
+                Here's what's slowing your business down:</p>
+            <div class="problems-grid">
+                <div class="problem-card reveal reveal-delay-1">
+                    <div class="problem-icon">🔁</div>
+                    <div class="problem-title">Repetitive Tasks</div>
+                    <div class="problem-desc">Your team spends 60% of their day on tasks that follow a predictable
+                        pattern — every single day.</div>
+                    <div class="problem-cost">⬆ 23 hrs/week wasted</div>
+                </div>
+                <div class="problem-card reveal reveal-delay-2">
+                    <div class="problem-icon">📋</div>
+                    <div class="problem-title">Manual Operations</div>
+                    <div class="problem-desc">Copying data between tools, updating spreadsheets, writing reports — done
+                        by humans who should be thinking strategically.</div>
+                    <div class="problem-cost">⬆ $4,800/mo in labor</div>
+                </div>
+                <div class="problem-card reveal reveal-delay-3">
+                    <div class="problem-icon">🐌</div>
+                    <div class="problem-title">Slow Responses</div>
+                    <div class="problem-desc">Customers wait hours for replies. Leads go cold. Support tickets pile up.
+                        Speed is everything.</div>
+                    <div class="problem-cost">⬆ 34% churn risk</div>
+                </div>
+                <div class="problem-card reveal reveal-delay-4">
+                    <div class="problem-icon">🧩</div>
+                    <div class="problem-title">Tool Fragmentation</div>
+                    <div class="problem-desc">Your stack has 12 tools that don't talk to each other. Data lives
+                        everywhere and nowhere.</div>
+                    <div class="problem-cost">⬆ 8 hrs/week reconciling</div>
+                </div>
+                <div class="problem-card reveal reveal-delay-5">
+                    <div class="problem-icon">🧱</div>
+                    <div class="problem-title">Human Bottlenecks</div>
+                    <div class="problem-desc">Growth stops when your team hits capacity. Hiring is expensive. Training
+                        takes months.</div>
+                    <div class="problem-cost">⬆ $60K+ per new hire</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SOLUTION -->
+    <section id="solution">
+        <div class="max-w">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center">
+                <div>
+                    <div class="reveal"><span class="section-label">The Solution</span></div>
+                    <h2 class="section-title reveal reveal-delay-1">Your Digital<br><span
+                            style="background:linear-gradient(135deg,var(--pink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Workforce</span>
+                    </h2>
+                    <p class="section-sub reveal reveal-delay-2">LoomOps deploys AI agents that work like digital
+                        employees — autonomous, intelligent, and always on. They handle the work so your team can focus
+                        on what actually moves the needle.</p>
+                    <div style="margin-top:32px;display:flex;flex-direction:column;gap:12px"
+                        class="reveal reveal-delay-3">
+                        <div style="display:flex;align-items:center;gap:12px;font-size:15px;color:var(--text2)"><span
+                                style="color:var(--pink);font-size:18px">✦</span> Autonomous decision-making within your
+                            rules</div>
+                        <div style="display:flex;align-items:center;gap:12px;font-size:15px;color:var(--text2)"><span
+                                style="color:var(--pink);font-size:18px">✦</span> Native integrations with your existing
+                            stack</div>
+                        <div style="display:flex;align-items:center;gap:12px;font-size:15px;color:var(--text2)"><span
+                                style="color:var(--pink);font-size:18px">✦</span> Deployed in days, not months</div>
+                        <div style="display:flex;align-items:center;gap:12px;font-size:15px;color:var(--text2)"><span
+                                style="color:var(--pink);font-size:18px">✦</span> Scales instantly without added
+                            headcount</div>
+                    </div>
+                    <div style="margin-top:40px" class="reveal reveal-delay-4"><button class="btn-primary">Explore
+                            Agents →</button></div>
+                </div>
+                <div class="reveal reveal-delay-2">
+                    <div class="agents-orbit" id="agentsOrbit">
+                        <div class="orbit-ring orbit-ring-1"></div>
+                        <div class="orbit-ring orbit-ring-2"></div>
+                        <div class="orbit-ring orbit-ring-3"></div>
+                        <div class="orbit-center">🧠</div>
+                        <svg class="connection-svg" id="connectionSvg" viewBox="0 0 500 500"
+                            xmlns="http://www.w3.org/2000/svg"></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section id="services" style="background:var(--bg1)">
+        <div class="max-w">
+            <div class="reveal"><span class="section-label">Services</span></div>
+            <h2 class="section-title reveal reveal-delay-1">Everything you need<br>to automate operations</h2>
+            <p class="section-sub reveal reveal-delay-2">From standalone AI agents to full workflow ecosystems — we
+                build, deploy, and optimize your AI workforce.</p>
+            <div class="services-grid reveal reveal-delay-3">
+                <div class="service-card">
+                    <div class="service-num">01</div>
+                    <div class="service-icon-wrap">🤖</div>
+                    <div class="service-name">AI Agents</div>
+                    <div class="service-desc">Custom autonomous AI agents built for your specific business role. They
+                        reason, act, and iterate without human input.</div>
+                    <div class="service-tags"><span class="service-tag">Sales</span><span
+                            class="service-tag">Support</span><span class="service-tag">HR</span><span
+                            class="service-tag">Operations</span><span class="service-tag">Finance</span></div>
+                    <div class="service-arrow">→</div>
+                </div>
+                <div class="service-card">
+                    <div class="service-num">02</div>
+                    <div class="service-icon-wrap">⚡</div>
+                    <div class="service-name">Workflow Automation</div>
+                    <div class="service-desc">Connect your tools and automate the logic in between. From email sequences
+                        to CRM updates, reporting to scheduling.</div>
+                    <div class="service-tags"><span class="service-tag">Email</span><span
+                            class="service-tag">CRM</span><span class="service-tag">Reports</span><span
+                            class="service-tag">Scheduling</span><span class="service-tag">Data Entry</span></div>
+                    <div class="service-arrow">→</div>
+                </div>
+                <div class="service-card">
+                    <div class="service-num">03</div>
+                    <div class="service-icon-wrap">🔌</div>
+                    <div class="service-name">AI Integrations</div>
+                    <div class="service-desc">Bring AI capabilities into tools your team already uses. We connect the
+                        intelligence layer to your existing workflow.</div>
+                    <div class="service-tags"><span class="service-tag">OpenAI</span><span
+                            class="service-tag">Claude</span><span class="service-tag">HubSpot</span><span
+                            class="service-tag">Salesforce</span><span class="service-tag">Notion</span></div>
+                    <div class="service-arrow">→</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how">
+        <div class="max-w" style="display:grid;grid-template-columns:1fr 1fr;gap:80px">
+            <div>
+                <div class="reveal"><span class="section-label">Process</span></div>
+                <h2 class="section-title reveal reveal-delay-1">From idea to<br>deployed AI in <span
+                        style="background:linear-gradient(135deg,var(--pink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">days</span>
+                </h2>
+                <p class="section-sub reveal reveal-delay-2">Our four-step framework gets your AI workforce operational
+                    faster than any other approach in the market.</p>
+            </div>
+            <div class="timeline reveal reveal-delay-2">
+                <div class="timeline-item">
+                    <div class="timeline-dot">01</div>
+                    <div class="timeline-content">
+                        <div class="timeline-step">Step 1</div>
+                        <div class="timeline-title">Discover</div>
+                        <div class="timeline-desc">We map your operations, identify the highest-ROI automation
+                            opportunities, and define your ideal AI workforce blueprint.</div>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">02</div>
+                    <div class="timeline-content">
+                        <div class="timeline-step">Step 2</div>
+                        <div class="timeline-title">Design</div>
+                        <div class="timeline-desc">We architect your agents, define their logic, permissions, and
+                            integrations — built around your exact business rules.</div>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">03</div>
+                    <div class="timeline-content">
+                        <div class="timeline-step">Step 3</div>
+                        <div class="timeline-title">Deploy</div>
+                        <div class="timeline-desc">Your AI workforce goes live. We handle testing, QA, and a monitored
+                            rollout to ensure zero disruption to your business.</div>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">04</div>
+                    <div class="timeline-content">
+                        <div class="timeline-step">Step 4</div>
+                        <div class="timeline-title">Optimize</div>
+                        <div class="timeline-desc">Continuous performance monitoring, model upgrades, and iteration.
+                            Your AI workforce gets smarter every week.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- INDUSTRIES -->
+    <section id="industries" style="background:var(--bg1)">
+        <div class="max-w">
+            <div class="reveal"><span class="section-label">Industries</span></div>
+            <h2 class="section-title reveal reveal-delay-1">Built for every<br>type of business</h2>
+            <div class="industries-wrap reveal reveal-delay-2">
+                <div class="industry-tabs">
+                    <button class="industry-tab active" data-tab="saas">SaaS</button>
+                    <button class="industry-tab" data-tab="ecom">E-commerce</button>
+                    <button class="industry-tab" data-tab="health">Healthcare</button>
+                    <button class="industry-tab" data-tab="finance">Finance</button>
+                    <button class="industry-tab" data-tab="realestate">Real Estate</button>
+                    <button class="industry-tab" data-tab="agency">Agencies</button>
+                </div>
+                <div class="industry-content">
+                    <div class="industry-content-inner active" id="tab-saas">
+                        <div class="industry-icon-large">🚀</div>
+                        <div>
+                            <div class="industry-title">SaaS Companies</div>
+                            <div class="industry-desc">Scale support, onboarding, and growth operations without scaling
+                                your team proportionally.</div>
+                            <div class="industry-bullets">
+                                <div class="industry-bullet">Automated onboarding sequences & in-app guidance</div>
+                                <div class="industry-bullet">AI support agents handling 90%+ of tier-1 tickets</div>
+                                <div class="industry-bullet">Lead scoring and outbound qualification at scale</div>
+                                <div class="industry-bullet">Churn prediction and automated retention workflows</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="industry-content-inner" id="tab-ecom">
+                        <div class="industry-icon-large">🛍️</div>
+                        <div>
+                            <div class="industry-title">E-commerce Brands</div>
+                            <div class="industry-desc">Automate customer service, inventory ops, and post-purchase flows
+                                to drive retention.</div>
+                            <div class="industry-bullets">
+                                <div class="industry-bullet">24/7 customer service agent across all channels</div>
+                                <div class="industry-bullet">Automated order management and returns processing</div>
+                                <div class="industry-bullet">Personalized post-purchase email sequences</div>
+                                <div class="industry-bullet">Inventory alerts and supplier communication</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="industry-content-inner" id="tab-health">
+                        <div class="industry-icon-large">🏥</div>
+                        <div>
+                            <div class="industry-title">Healthcare Practices</div>
+                            <div class="industry-desc">Reduce administrative burden and improve patient experience with
+                                compliant AI automation.</div>
+                            <div class="industry-bullets">
+                                <div class="industry-bullet">Appointment scheduling and reminder workflows</div>
+                                <div class="industry-bullet">Insurance pre-authorization processing</div>
+                                <div class="industry-bullet">Patient intake and document collection</div>
+                                <div class="industry-bullet">HIPAA-compliant communication workflows</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="industry-content-inner" id="tab-finance">
+                        <div class="industry-icon-large">📈</div>
+                        <div>
+                            <div class="industry-title">Financial Services</div>
+                            <div class="industry-desc">Automate compliance-heavy ops, reporting, and client
+                                communication without risk.</div>
+                            <div class="industry-bullets">
+                                <div class="industry-bullet">Automated KYC document collection and review</div>
+                                <div class="industry-bullet">Daily reporting and portfolio summary generation</div>
+                                <div class="industry-bullet">Client onboarding workflow automation</div>
+                                <div class="industry-bullet">Compliance monitoring and alert management</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="industry-content-inner" id="tab-realestate">
+                        <div class="industry-icon-large">🏡</div>
+                        <div>
+                            <div class="industry-title">Real Estate</div>
+                            <div class="industry-desc">Never miss a lead, automate follow-ups, and manage listings at
+                                scale.</div>
+                            <div class="industry-bullets">
+                                <div class="industry-bullet">Instant lead response and qualification agents</div>
+                                <div class="industry-bullet">Automated showing scheduling and reminders</div>
+                                <div class="industry-bullet">CRM updates from email and call transcripts</div>
+                                <div class="industry-bullet">Market report generation for clients</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="industry-content-inner" id="tab-agency">
+                        <div class="industry-icon-large">🎯</div>
+                        <div>
+                            <div class="industry-title">Agencies</div>
+                            <div class="industry-desc">Deliver more client value and operate more profitably by
+                                automating internal ops.</div>
+                            <div class="industry-bullets">
+                                <div class="industry-bullet">Client reporting automation across all channels</div>
+                                <div class="industry-bullet">Proposal generation from brief to draft</div>
+                                <div class="industry-bullet">Project status updates and deadline monitoring</div>
+                                <div class="industry-bullet">New business research and lead qualification</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- RESULTS -->
+    <section id="results">
+        <div class="max-w">
+            <div class="reveal"><span class="section-label">Results</span></div>
+            <h2 class="section-title reveal reveal-delay-1">The numbers<br>speak for themselves</h2>
+            <div class="results-grid">
+                <div class="result-card reveal reveal-delay-1">
+                    <div class="result-icon">⏱️</div>
+                    <div class="result-number">8,400+</div>
+                    <div class="result-label">Hours saved per client per year</div>
+                </div>
+                <div class="result-card reveal reveal-delay-2">
+                    <div class="result-icon">⚡</div>
+                    <div class="result-number">240K+</div>
+                    <div class="result-label">Tasks automated monthly</div>
+                </div>
+                <div class="result-card reveal reveal-delay-3">
+                    <div class="result-icon">💰</div>
+                    <div class="result-number">67%</div>
+                    <div class="result-label">Average operational cost reduction</div>
+                </div>
+                <div class="result-card reveal reveal-delay-4">
+                    <div class="result-icon">🚀</div>
+                    <div class="result-number">12×</div>
+                    <div class="result-label">Faster response times across channels</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CASE STUDIES -->
+    <section style="background:var(--bg1)">
+        <div class="max-w">
+            <div class="reveal"><span class="section-label">Case Studies</span></div>
+            <h2 class="section-title reveal reveal-delay-1">Real businesses,<br>real results</h2>
+            <div class="cases-grid">
+                <div class="case-card reveal reveal-delay-1">
+                    <div class="case-header">
+                        <div class="case-company">Novara Health</div><span class="case-industry">Healthcare</span>
+                    </div>
+                    <div class="case-body">
+                        <div class="case-label">Problem</div>
+                        <div class="case-text">Administrative staff spent 6+ hours daily scheduling appointments,
+                            collecting intake forms, and chasing insurance approvals.</div>
+                        <div class="case-label">Solution</div>
+                        <div class="case-text">LoomOps deployed a scheduling AI agent and an intake automation workflow
+                            integrated with their EHR system.</div>
+                        <div class="case-result">
+                            <div class="case-result-num">82%</div>
+                            <div class="case-result-text">Reduction in admin hours — saving 3 FTEs</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="case-card reveal reveal-delay-2">
+                    <div class="case-header">
+                        <div class="case-company">Velostack</div><span class="case-industry">SaaS</span>
+                    </div>
+                    <div class="case-body">
+                        <div class="case-label">Problem</div>
+                        <div class="case-text">Customer support team was overwhelmed with tier-1 tickets, causing 8+
+                            hour response times and increasing churn.</div>
+                        <div class="case-label">Solution</div>
+                        <div class="case-text">A custom Support Agent was trained on their product docs and deployed
+                            across email, chat, and Slack.</div>
+                        <div class="case-result">
+                            <div class="case-result-num">94%</div>
+                            <div class="case-result-text">Of tickets resolved autonomously in under 90 seconds</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="case-card reveal reveal-delay-3">
+                    <div class="case-header">
+                        <div class="case-company">Meridian RE</div><span class="case-industry">Real Estate</span>
+                    </div>
+                    <div class="case-body">
+                        <div class="case-label">Problem</div>
+                        <div class="case-text">Leads from 6 different sources were falling through the cracks due to
+                            manual follow-up processes and CRM lag.</div>
+                        <div class="case-label">Solution</div>
+                        <div class="case-text">LoomOps built a lead qualification agent that responds within 90 seconds,
+                            qualifies, and books meetings automatically.</div>
+                        <div class="case-result">
+                            <div class="case-result-num">4.2×</div>
+                            <div class="case-result-text">Increase in qualified demos booked per month</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section>
+        <div class="max-w">
+            <div class="reveal"><span class="section-label">Testimonials</span></div>
+            <h2 class="section-title reveal reveal-delay-1">Trusted by forward-thinking<br>operations teams</h2>
+            <div class="testimonials-wrap reveal reveal-delay-2">
+                <div class="testimonials-track" id="testimonialTrack">
+                    <div class="testimonial-card">
+                        <div class="stars">★★★★★</div>
+                        <div class="testimonial-quote">"</div>
+                        <div class="testimonial-text">LoomOps didn't just automate our workflows — they fundamentally
+                            changed how we think about operations. We scaled from 50 to 200 customers without adding a
+                            single ops hire.</div>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">JL</div>
+                            <div>
+                                <div class="testimonial-name">James Lim</div>
+                                <div class="testimonial-role">COO, Velostack</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="stars">★★★★★</div>
+                        <div class="testimonial-quote">"</div>
+                        <div class="testimonial-text">The support agent they built resolved 94% of our tickets on day
+                            one. Our team now only handles escalations. Customer satisfaction has never been higher.
+                        </div>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">SR</div>
+                            <div>
+                                <div class="testimonial-name">Sofia Reyes</div>
+                                <div class="testimonial-role">VP Customer Success, Arclux</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="stars">★★★★★</div>
+                        <div class="testimonial-quote">"</div>
+                        <div class="testimonial-text">We were skeptical. We're not anymore. The ROI was visible within
+                            the first 30 days. Our admin team went from drowning to strategic in three months.</div>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">MK</div>
+                            <div>
+                                <div class="testimonial-name">Marcus Klein</div>
+                                <div class="testimonial-role">CEO, Novara Health</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="stars">★★★★★</div>
+                        <div class="testimonial-quote">"</div>
+                        <div class="testimonial-text">Best investment we made this year. LoomOps built us a lead
+                            qualification system that works harder at 3am than any BDR I've ever hired.</div>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">AC</div>
+                            <div>
+                                <div class="testimonial-name">Aisha Chen</div>
+                                <div class="testimonial-role">Head of Growth, Meridian RE</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="stars">★★★★★</div>
+                        <div class="testimonial-quote">"</div>
+                        <div class="testimonial-text">The integration work alone saved us hundreds of engineering hours.
+                            Their AI agents connected tools that we assumed could never talk to each other.</div>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">TP</div>
+                            <div>
+                                <div class="testimonial-name">Tom Pearce</div>
+                                <div class="testimonial-role">CTO, Synflow Agency</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- duplicate for infinite scroll -->
+                    <div class="testimonial-card">
+                        <div class="stars">★★★★★</div>
+                        <div class="testimonial-quote">"</div>
+                        <div class="testimonial-text">LoomOps didn't just automate our workflows — they fundamentally
+                            changed how we think about operations. We scaled from 50 to 200 customers without adding a
+                            single ops hire.</div>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">JL</div>
+                            <div>
+                                <div class="testimonial-name">James Lim</div>
+                                <div class="testimonial-role">COO, Velostack</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="stars">★★★★★</div>
+                        <div class="testimonial-quote">"</div>
+                        <div class="testimonial-text">The support agent they built resolved 94% of our tickets on day
+                            one. Our team now only handles escalations. Customer satisfaction has never been higher.
+                        </div>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">SR</div>
+                            <div>
+                                <div class="testimonial-name">Sofia Reyes</div>
+                                <div class="testimonial-role">VP Customer Success, Arclux</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="stars">★★★★★</div>
+                        <div class="testimonial-quote">"</div>
+                        <div class="testimonial-text">We were skeptical. We're not anymore. The ROI was visible within
+                            the first 30 days. Our admin team went from drowning to strategic in three months.</div>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">MK</div>
+                            <div>
+                                <div class="testimonial-name">Marcus Klein</div>
+                                <div class="testimonial-role">CEO, Novara Health</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="stars">★★★★★</div>
+                        <div class="testimonial-quote">"</div>
+                        <div class="testimonial-text">Best investment we made this year. LoomOps built us a lead
+                            qualification system that works harder at 3am than any BDR I've ever hired.</div>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">AC</div>
+                            <div>
+                                <div class="testimonial-name">Aisha Chen</div>
+                                <div class="testimonial-role">Head of Growth, Meridian RE</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="stars">★★★★★</div>
+                        <div class="testimonial-quote">"</div>
+                        <div class="testimonial-text">The integration work alone saved us hundreds of engineering hours.
+                            Their AI agents connected tools that we assumed could never talk to each other.</div>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">TP</div>
+                            <div>
+                                <div class="testimonial-name">Tom Pearce</div>
+                                <div class="testimonial-role">CTO, Synflow Agency</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" style="background:var(--bg1)">
+        <div class="max-w" style="text-align:center">
+            <div class="reveal"><span class="section-label">FAQ</span></div>
+            <h2 class="section-title reveal reveal-delay-1">Common questions</h2>
+            <div class="faq-list" style="text-align:left">
+                <div class="faq-item">
+                    <div class="faq-q">How quickly can LoomOps deploy an AI agent? <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-a">
+                        <p>Most agents are live within 5–14 business days. Simple single-task agents can be deployed
+                            faster. More complex multi-system workflows with custom integrations typically take 2–4
+                            weeks for full deployment.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">Do I need technical knowledge to work with LoomOps? <span
+                            class="faq-toggle">+</span></div>
+                    <div class="faq-a">
+                        <p>Not at all. We handle all the technical build, integration, and maintenance. Your team only
+                            needs to know your business — we handle everything else. We have a simple onboarding process
+                            that captures your requirements in plain language.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">How do your AI agents integrate with our existing tools? <span
+                            class="faq-toggle">+</span></div>
+                    <div class="faq-a">
+                        <p>We connect natively with 100+ tools including HubSpot, Salesforce, Slack, Gmail, Notion,
+                            Google Workspace, Zapier, Make, and more. If you use something more custom, we use APIs to
+                            build a bespoke integration.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">What happens if an agent makes a mistake? <span class="faq-toggle">+</span></div>
+                    <div class="faq-a">
+                        <p>Every agent includes configurable human-in-the-loop checkpoints for sensitive actions. We
+                            also build monitoring dashboards so you can see everything your agents do in real-time. All
+                            agents include rollback capabilities.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">Is our company data secure with LoomOps? <span class="faq-toggle">+</span></div>
+                    <div class="faq-a">
+                        <p>Yes. We follow enterprise-grade security practices, including data encryption at rest and in
+                            transit, minimal data retention policies, and role-based access controls. We operate as a
+                            data processor under your privacy policies and can execute DPAs.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">How is LoomOps different from using Zapier or Make directly? <span
+                            class="faq-toggle">+</span></div>
+                    <div class="faq-a">
+                        <p>Zapier and Make are rule-based automation tools — they follow a fixed logic tree. LoomOps
+                            agents use LLMs to reason, adapt, and make decisions based on context. They can handle
+                            ambiguity, unexpected inputs, and nuanced situations that break traditional automation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <section class="cta-section">
+        <div class="cta-bg"></div>
+        <div class="cta-border reveal">
+            <div class="cta-glow"></div>
+            <span class="section-label" style="justify-content:center">Get Started</span>
+            <h2 class="cta-title">Build Your<br><span
+                    style="background:linear-gradient(135deg,var(--pink),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">AI
+                    Workforce</span></h2>
+            <p class="cta-sub">Stop hiring for repetitive work. Deploy AI agents instead. Your operations, transformed.
+            </p>
+            <div class="hero-actions">
+                <button class="btn-primary" style="font-size:16px;padding:16px 32px">Book a Strategy Call →</button>
+                <button class="btn-secondary" style="font-size:16px;padding:16px 32px">Get Started Free</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <div class="footer-logo">LoomOps</div>
+                <div class="footer-tagline">AI Agents for Business Operations. Weave AI into every workflow.</div>
+                <div class="footer-socials">
+                    <a class="social-btn" href="#" title="LinkedIn">in</a>
+                    <a class="social-btn" href="#" title="X">𝕏</a>
+                    <a class="social-btn" href="#" title="GitHub">⌥</a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4><a href="#">AI Agents</a><a href="#">Workflow Automation</a><a href="#">AI
+                    Integrations</a><a href="#">Custom Solutions</a>
+            </div>
+            <div class="footer-col">
+                <h4>Solutions</h4><a href="#">Sales Automation</a><a href="#">Support Automation</a><a href="#">Ops
+                    Automation</a><a href="#">Reporting Agents</a>
+            </div>
+            <div class="footer-col">
+                <h4>Industries</h4><a href="#">SaaS</a><a href="#">E-commerce</a><a href="#">Healthcare</a><a
+                    href="#">Finance</a><a href="#">Agencies</a>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4><a href="#">Case Studies</a><a href="#">Pricing</a><a href="#">About</a><a
+                    href="#">Contact</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-copy">© 2025 LoomOps Inc. All rights reserved.</div>
+            <div class="footer-built">Privacy · Terms · Security</div>
+        </div>
+    </footer>
+
+    <script>
+        // CURSOR
+        const cursor = document.getElementById('cursor');
+        const cursorTrail = document.getElementById('cursor-trail');
+        const mouseGlow = document.getElementById('mouseGlow');
+        let mx = 0, my = 0, tx = 0, ty = 0;
+        document.addEventListener('mousemove', e => {
+            mx = e.clientX; my = e.clientY;
+            cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+            mouseGlow.style.left = mx + 'px'; mouseGlow.style.top = my + 'px';
+            setTimeout(() => { cursorTrail.style.left = mx + 'px'; cursorTrail.style.top = my + 'px' }, 80);
+        });
+
+        // NAV SCROLL
+        window.addEventListener('scroll', () => {
+            document.getElementById('navbar').classList.toggle('scrolled', scrollY > 60);
+        });
+
+        // PARTICLES
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        class Particle {
+            constructor() { this.reset() }
+            reset() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.size = Math.random() * 1.5 + 0.5; this.vx = (Math.random() - 0.5) * 0.3; this.vy = (Math.random() - 0.5) * 0.3; this.opacity = Math.random() * 0.4 + 0.1; this.color = Math.random() > 0.5 ? '255,79,216' : '168,85,247' }
+            update() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset() }
+            draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fillStyle = `rgba(${this.color},${this.opacity})`; ctx.fill() }
+        }
+        for (let i = 0; i < 120; i++)particles.push(new Particle());
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw() });
+            // connections
+            particles.forEach((p, i) => {
+                particles.slice(i + 1).forEach(q => {
+                    const d = Math.hypot(p.x - q.x, p.y - q.y);
+                    if (d < 100) { ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.strokeStyle = `rgba(255,79,216,${0.06 * (1 - d / 100)})`; ctx.lineWidth = 0.5; ctx.stroke() }
+                })
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // REVEAL ON SCROLL
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') });
+        }, { threshold: 0.15 });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // COUNTER ANIMATION
+        function animateCounter(el) {
+            const target = parseInt(el.dataset.target);
+            let current = 0;
+            const step = target / 60;
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) { current = target; clearInterval(timer) }
+                el.textContent = Math.floor(current);
+            }, 16);
+        }
+        const counterObserver = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.querySelectorAll('.counter').forEach(animateCounter);
+                    counterObserver.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        document.querySelectorAll('.stats-grid').forEach(el => counterObserver.observe(el));
+
+        // FAQ
+        document.querySelectorAll('.faq-q').forEach(q => {
+            q.addEventListener('click', () => {
+                const item = q.parentElement;
+                const wasOpen = item.classList.contains('open');
+                document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+                if (!wasOpen) item.classList.add('open');
+            });
+        });
+
+        // INDUSTRY TABS
+        document.querySelectorAll('.industry-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.industry-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.industry-content-inner').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                const id = 'tab-' + tab.dataset.tab;
+                document.getElementById(id).classList.add('active');
+            });
+        });
+
+        // ORBIT AGENTS
+        const orbit = document.getElementById('agentsOrbit');
+        if (orbit) {
+            const agents = [
+                { emoji: '🤖', label: 'Sales', angle: 0, r: 110 },
+                { emoji: '💬', label: 'Support', angle: 60, r: 110 },
+                { emoji: '⚙️', label: 'Ops', angle: 120, r: 110 },
+                { emoji: '📊', label: 'Reports', angle: 180, r: 110 },
+                { emoji: '🔍', label: 'Research', angle: 240, r: 110 },
+                { emoji: '👥', label: 'HR', angle: 300, r: 110 },
+            ];
+            agents.forEach(a => {
+                const el = document.createElement('div');
+                el.className = 'orbit-agent';
+                el.innerHTML = `${a.emoji}<span>${a.label}</span>`;
+                const rad = a.angle * (Math.PI / 180);
+                const cx = 250, cy = 250;
+                const x = cx + a.r * Math.cos(rad);
+                const y = cy + a.r * Math.sin(rad);
+                el.style.transform = `translate(calc(${x}px - 50%), calc(${y}px - 50%))`;
+                orbit.appendChild(el);
+            });
+            // Animate
+            let angle = 0;
+            function animateOrbit() {
+                angle += 0.003;
+                const all = orbit.querySelectorAll('.orbit-agent');
+                const base = [0, 60, 120, 180, 240, 300];
+                all.forEach((el, i) => {
+                    const a = (base[i] * (Math.PI / 180)) + angle;
+                    const cx = 250, cy = 250, r = 110;
+                    const x = cx + r * Math.cos(a);
+                    const y = cy + r * Math.sin(a);
+                    el.style.transform = `translate(calc(${x}px - 50%), calc(${y}px - 50%))`;
+                });
+                // Draw connection lines
+                const svg = document.getElementById('connectionSvg');
+                if (svg) {
+                    svg.innerHTML = '';
+                    all.forEach(el => {
+                        const rect = el.getBoundingClientRect();
+                        const orbitRect = orbit.getBoundingClientRect();
+                        const ax = rect.left - orbitRect.left + rect.width / 2;
+                        const ay = rect.top - orbitRect.top + rect.height / 2;
+                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        line.setAttribute('x1', 250); line.setAttribute('y1', 250);
+                        line.setAttribute('x2', ax); line.setAttribute('y2', ay);
+                        line.setAttribute('stroke', 'rgba(255,79,216,0.15)');
+                        line.setAttribute('stroke-width', '1');
+                        line.setAttribute('stroke-dasharray', '4 6');
+                        svg.appendChild(line);
+                    });
+                }
+                requestAnimationFrame(animateOrbit);
+            }
+            animateOrbit();
+        }
+
+        // PARALLAX
+        window.addEventListener('scroll', () => {
+            const sy = window.scrollY;
+            const meshGrad = document.querySelector('.mesh-gradient');
+            if (meshGrad) meshGrad.style.transform = `translateY(${sy * 0.3}px)`;
+        });
+    </script>
+</body>
+
+</html>
